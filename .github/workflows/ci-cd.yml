@@ -1,0 +1,49 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Run tests - Auth Service
+      run: |
+        cd auth-service
+        npm install
+        npm test
+
+    - name: Run tests - Todo Service
+      run: |
+        cd todo-service
+        npm install
+        npm test
+
+    - name: Build and push auth-service image
+      run: |
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/auth-service ./auth-service
+        docker push ${{ secrets.DOCKER_USERNAME }}/auth-service
+
+    - name: Build and push todo-service image
+      run: |
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/todo-service ./todo-service
+        docker push ${{ secrets.DOCKER_USERNAME }}/todo-service
+
+    - name: Build and push frontend image
+      run: |
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/frontend ./frontend
+        docker push ${{ secrets.DOCKER_USERNAME }}/frontend

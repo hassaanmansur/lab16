@@ -15,6 +15,7 @@ services:
 
   frontend:
     build: ./frontend
+    command: echo "Frontend built"
     networks:
       - app-network
 
@@ -24,6 +25,7 @@ services:
       - "80:80"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./frontend/build:/usr/share/nginx/html
     depends_on:
       - frontend
       - auth-service
